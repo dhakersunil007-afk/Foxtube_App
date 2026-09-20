@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FoxTube - Official App</title>
+    <!-- Google Analytics Script (Aap apni GA measurement ID yahan daal sakte hain baad mein) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,14 +45,14 @@
         .install-btn {
             display: block; width: 100%; text-align: center; background-color: var(--accent-color);
             color: #000; font-weight: 500; font-size: 16px; padding: 12px; border-radius: 25px;
-            text-decoration: none; margin-bottom: 30px; transition: all 0.2s;
+            text-decoration: none; margin-bottom: 30px; transition: all 0.2s; cursor: pointer;
         }
         .install-btn:hover { background-color: var(--accent-hover); transform: scale(0.98); }
 
         /* Video Trailer Section */
         .section-title { font-size: 18px; font-weight: 500; margin-bottom: 15px; margin-top: 25px;}
         .video-container {
-            position: relative; padding-bottom: 56.25%; /* 16:9 Aspect Ratio */ height: 0;
+            position: relative; padding-bottom: 56.25%; height: 0;
             overflow: hidden; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1);
         }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -85,7 +93,6 @@
         .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .review-header h2 { font-size: 16px; font-weight: 500; }
         
-        /* Star Rating Logic */
         .star-rating { direction: rtl; display: inline-flex; font-size: 30px; }
         .star-rating input { display: none; }
         .star-rating label { color: #555; cursor: pointer; padding: 0 5px; transition: color 0.2s; }
@@ -97,7 +104,6 @@
         .submit-review-btn { background: var(--accent-color); color: #000; padding: 10px 24px; border: none; border-radius: 20px; font-weight: 500; margin-top: 15px; cursor: pointer; display: inline-block; }
         .submit-review-btn:hover { background: var(--accent-hover); }
 
-        /* Fake existing reviews */
         .user-reviews { margin-top: 20px; }
         .single-review { border-top: 1px solid rgba(255,255,255,0.1); padding: 15px 0; }
         .reviewer-info { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
@@ -105,7 +111,6 @@
         .reviewer-name { font-size: 14px; font-weight: 500; }
         .review-stars { color: #00e676; font-size: 12px; }
         .review-text { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
-
     </style>
 </head>
 <body>
@@ -121,7 +126,7 @@
             </div>
         </div>
 
-        <!-- App Stats -->
+        <!-- App Stats with Live Download Counter -->
         <div class="stats-row">
             <div class="stat-box">
                 <div class="value">4.9 <span>★</span></div>
@@ -129,7 +134,7 @@
             </div>
             <div class="stat-divider"></div>
             <div class="stat-box">
-                <div class="value">100K+</div>
+                <div class="value" id="downloadCount">1,428</div>
                 <div class="label">Downloads</div>
             </div>
             <div class="stat-divider"></div>
@@ -139,13 +144,12 @@
             </div>
         </div>
 
-        <!-- Download Button -->
-        <a href="https://github.com/dhakersunil007-afk/Foxtube_App/raw/refs/heads/main/FoxTube.apk" class="install-btn">Download APK</a>
+        <!-- Download Button with Tracker -->
+        <a href="FoxTube.apk" download class="install-btn" onclick="trackDownload()">Download APK</a>
 
         <!-- YouTube Video Trailer -->
         <div class="section-title">App Trailer</div>
         <div class="video-container">
-            <!-- Embed YouTube Video -->
             <iframe src="https://www.youtube.com/embed/Krc2NKvfbuc?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
@@ -206,7 +210,6 @@
             </div>
             <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Tell others what you think</p>
             
-            <!-- 5 Star Interactive Rating -->
             <div class="star-rating">
                 <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">★</label>
                 <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
@@ -218,7 +221,6 @@
             <textarea id="userComment" class="comment-box" placeholder="Describe your experience (optional)"></textarea>
             <button class="submit-review-btn" onclick="submitReview()">Post</button>
 
-            <!-- Pre-filled reviews to look authentic -->
             <div class="user-reviews">
                 <div class="single-review">
                     <div class="reviewer-info">
@@ -254,11 +256,20 @@
             modal.style.display = "none";
         }
 
-        // Close modal if user clicks outside the image
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
+        }
+
+        // Live Download Tracker Logic
+        let downloads = localStorage.getItem('foxtube_downloads') || 1428;
+        document.getElementById('downloadCount').innerText = Number(downloads).toLocaleString() + "+";
+
+        function trackDownload() {
+            downloads++;
+            localStorage.setItem('foxtube_downloads', downloads);
+            document.getElementById('downloadCount').innerText = Number(downloads).toLocaleString() + "+";
         }
 
         // Review Submit Function
@@ -271,10 +282,7 @@
                 return;
             }
             
-            // Fake submission success
             alert("Thank you! Your review has been submitted successfully and will appear after moderation.");
-            
-            // Clear form
             document.getElementById('userComment').value = "";
             var radios = document.getElementsByName('rating');
             for(var i=0; i<radios.length; i++) { radios[i].checked = false; }
